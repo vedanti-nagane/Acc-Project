@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify
-from cleaner_pandas import clean_data  
+from data_preprocessing import clean_data  
 # ✅ Import your cleaning logic
 
 app = Flask(__name__)
