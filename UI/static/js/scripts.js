@@ -1,45 +1,56 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Chart 1: Pie Chart
-    new Chart(document.getElementById("chart1"), {
-        type: "pie",
-        data: {
-            labels: ["Allowed", "Not allowed"],
-            datasets: [{
-                data: [20, 30],
-                backgroundColor: ["green", "blue"]
-            }]
-        }
-    });
-
-    // Chart 2: Bar Chart
-    new Chart(document.getElementById("chart2"), {
-        type: "bar",
-        data: {
-            labels: ["Allowed", "Not Allowed"],
-            datasets: [{
-                label: "Allowed",
-                data: [1, 2],
-                backgroundColor: ["green", "blue"]
-            }]
-        }
-    });
-
-    // Fetch table data
     fetch("/data")
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById("data-table");
+            let allowed = 0, notAllowed = 0;
+
             data.forEach(row => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                <td>${row["Timestamp"]}</td>
-                <td>${row["IP Address"]}</td>
-                <td>${row["Username"]}</td>
-                <td>${row["Process Name"]}</td>
-                <td>${row["Permission"]}</td>
+                    <td>${row["Timestamp"]}</td>
+                    <td>${row["IP Address"]}</td>
+                    <td>${row["Username"]}</td>
+                    <td>${row["Process Name"]}</td>
+                    <td>${row["Permission"] === "true" ? "Allowed" : row["Permission"] === "false" ? "Not Allowed" : "Invalid"}</td>
                 `;
                 tbody.appendChild(tr);
+
+                // Count permission types
+                if (row["Permission"] === "true") allowed++;
+                else if (row["Permission"] === "false") notAllowed++;
             });
+
+            // PIE Chart
+            new Chart(document.getElementById("chart1"), {
+                type: "pie",
+                data: {
+                    labels: ["Allowed", "Not Allowed"],
+                    datasets: [{
+                        data: [allowed, notAllowed],
+                        backgroundColor: ["green", "blue"]
+                    }]
+                }
+            });
+
+            // BAR Chart
+            new Chart(document.getElementById("chart2"), {
+                type: "bar",
+                data: {
+                    labels: ["Allowed", "Not Allowed"],
+                    datasets: [{
+                        label: "Accesses",
+                        data: [allowed, notAllowed],
+                        backgroundColor: ["green", "blue"]
+                    }]
+                }
+            });
+
+            // Optional: summary text
+            const summary = document.getElementById("summary-text");
+            if (summary) {
+                summary.textContent = `Allowed: ${allowed} | Not Allowed: ${notAllowed}`;
+            }
         })
         .catch(error => console.error("Error fetching data:", error));
 });
